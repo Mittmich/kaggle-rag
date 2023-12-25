@@ -1,4 +1,6 @@
 """Scraping utils"""
+from __future__ import annotations
+
 import json
 import random
 from functools import lru_cache
@@ -7,11 +9,13 @@ from urllib.parse import urljoin
 
 import brotli
 import requests
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
+from pydantic import Field
 
 
 class CompetitionPost(BaseModel):
     """Post model for competition API"""
+
     competitionIdOrName: str = Field(..., alias="id")
 
     def __hash__(self) -> int:
@@ -20,6 +24,7 @@ class CompetitionPost(BaseModel):
 
 class DiscussionTopicPost(BaseModel):
     """Post model for discussion topic API"""
+
     page: int = Field(1, alias="page")
     forumId: int = Field(..., alias="forumId")
 
@@ -29,6 +34,7 @@ class DiscussionTopicPost(BaseModel):
 
 class DiscussionPost(BaseModel):
     """Post model for discussion API"""
+
     forumTopicId: int = Field(..., alias="forumTopicId")
     includeComments: bool = Field(True, alias="includeComments")
 
@@ -38,6 +44,7 @@ class DiscussionPost(BaseModel):
 
 class KaggleCompetitionCrawler:
     """Crawler for Kaggle competition discussion"""
+
     BASE_URL = "https://www.kaggle.com"
     COMPETITION_API_URL = (
         "/api/i/competitions.legacy.LegacyCompetitionService/GetCompetition"
@@ -51,7 +58,7 @@ class KaggleCompetitionCrawler:
         # open session
         self.session = requests.Session()
         self.session.get(
-            f"https://www.kaggle.com/competitions/{competition_name}/discussion/"
+            f"https://www.kaggle.com/competitions/{competition_name}/discussion/",
         )
         self.headers = {
             "accept-encoding": "gzip, deflate, br",
@@ -76,7 +83,10 @@ class KaggleCompetitionCrawler:
             print(f"Getting topics from page {current_page}...")
             parsed = self._post_to_api(
                 urljoin(self.BASE_URL, self.DISCUSSION_TOPIC_URL),
-                data=DiscussionTopicPost(forumId=discussion_id, page=current_page),
+                data=DiscussionTopicPost(
+                    forumId=discussion_id,
+                    page=current_page,
+                ),
             )
             if "topics" in parsed:
                 # parse id
@@ -108,7 +118,11 @@ class KaggleCompetitionCrawler:
     def _post_to_api(self, url, data: BaseModel):
         # add random delay
         sleep(self.RANDOM_DELAY * random.random())
-        response = self.session.post(url, headers=self.headers, json=data.model_dump())
+        response = self.session.post(
+            url,
+            headers=self.headers,
+            json=data.model_dump(),
+        )
         response.raise_for_status()
         return self._parse_response(response)
 

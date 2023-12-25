@@ -1,9 +1,9 @@
-numpy
-pandas
-scipy
-scikit-learn
-matplotlib
-seaborn
 ipykernel
 kaggle
+matplotlib
+numpy
+pandas
+scikit-learn
+scipy
 scrapy
+seaborn
