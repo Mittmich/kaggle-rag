@@ -1,3 +1,4 @@
+"""Streamlit prototype for the chatbot."""
 from __future__ import annotations
 
 import os
@@ -29,16 +30,19 @@ PROMPT_TEMPLATE = """Answer the question based on the following context:
 
 
 def available_competitions():
+    """Return a list of available competitions."""
     return os.listdir(str(JUPYTER_NB_CACHE_DIR))
 
 
 def load_document(path):
+    """Load a document from a path."""
     doc = UnstructuredMarkdownLoader(path).load()
     split_doc = RecursiveCharacterTextSplitter(chunk_size=1000).split_documents(doc)
     return split_doc
 
 
 def format_docs(docs):
+    """Format a list of documents."""
     return "\n\n----------------------------------------------------\n\n".join(
         [d.page_content for d in docs],
     )
@@ -46,6 +50,7 @@ def format_docs(docs):
 
 @st.cache_resource
 def create_vector_store(directory, api_key):
+    """Create a vector store from a directory of documents."""
     documents = os.listdir(str(directory))
     split_docs = []
     for doc in documents:
@@ -62,6 +67,7 @@ def create_vector_store(directory, api_key):
 
 
 def create_chain(competition_name, api_key, model_name="gpt-3.5-turbo-1106"):
+    """Create a chain for a competition."""
     # create retriever
     split_docs, vectorstore = create_vector_store(
         str(JUPYTER_NB_CACHE_DIR / competition_name),
@@ -86,6 +92,7 @@ def create_chain(competition_name, api_key, model_name="gpt-3.5-turbo-1106"):
 
 
 def generate_response(input_text, api_key, model_name):
+    """Generate a response from a chain."""
     chain = create_chain(competition, api_key, model_name)
     with st.chat_message("Bot:"):
         message_placeholder = st.empty()
@@ -103,7 +110,7 @@ st.title("Chat with Kaggle competitions")
 
 openai_api_key = st.sidebar.text_input("OpenAI API Key", type="password")
 st.sidebar.markdown("# Select a model")
-model_name = st.sidebar.selectbox("Model", ["gpt-3.5-turbo-1106", "gpt-4-1106-preview"])
+selected_model_name = st.sidebar.selectbox("Model", ["gpt-3.5-turbo-1106", "gpt-4-1106-preview"])
 st.sidebar.markdown("# Select a competition")
 competition = st.sidebar.selectbox("Competition", competitions)
 
@@ -118,8 +125,7 @@ with st.sidebar.form("add_competition"):
     if competition_added and competition_to_add and os.path.exists(dir_path):
         st.warning("Competition already added!")
     if competition_added and competition_to_add and not os.path.exists(dir_path):
-        progress_text = "Create directories..."
-        my_bar = st.progress(0, text=progress_text)
+        my_bar = st.progress(0, text="Create directories...")
         # create top level directory
         os.mkdir(dir_path)
         # create jupyter notebooks directory
@@ -158,7 +164,7 @@ with st.form("my_form"):
     if not competition:
         st.warning("Please select a competition!", icon="⚠")
     if submitted and openai_api_key.startswith("sk-"):
-        used_chain = generate_response(text, openai_api_key, model_name)
+        used_chain = generate_response(text, openai_api_key, selected_model_name)
 
 # write context
 
