@@ -1,3 +1,4 @@
+"""Utility functions for server"""
 from __future__ import annotations
 
 import io
@@ -17,10 +18,14 @@ from pydantic import Field
 
 
 class KaggleCompetitionDownloader:
+    """Downloader for Kaggle competition kernels"""
+
     def __init__(self, competition_name: str) -> None:
+        """Initialize downloader"""
         self.competition_name = competition_name
 
     def list_kernels(self):
+        """List all kernels for a competition"""
         current_page = 1
         finished = False
         output_frames = []
@@ -40,6 +45,7 @@ class KaggleCompetitionDownloader:
                     "100",
                 ],
                 capture_output=True,
+                check=True,
             )
             output = res.stdout.decode("utf-8")
             if "Not found" in output:
@@ -52,14 +58,19 @@ class KaggleCompetitionDownloader:
         return pd.concat(output_frames)
 
     def download_kernel(self, kernels: pd.DataFrame, path: str):
+        """Download kernels to path"""
         for _, row in kernels.iterrows():
-            subprocess.run(["kaggle", "kernels", "pull", row["ref"]], cwd=str(path))
+            subprocess.run(
+                ["kaggle", "kernels", "pull", row["ref"]], cwd=str(path), check=True
+            )
 
     def download_all_kernels(self, path: str):
+        """Download all kernels to path"""
         kernels = self.list_kernels()
         self.download_kernel(kernels, path)
 
     def convert_all_kernels(self, input_path: str, output_path: str):
+        """Convert all kernels from input_path to output_path"""
         kernels = os.listdir(input_path)
         for kernel in kernels:
             print(f"Converting {kernel}")
@@ -75,6 +86,7 @@ class KaggleCompetitionDownloader:
                     notebook_path,
                 ],
                 capture_output=True,
+                check=True,
             )
             if res.returncode != 0:
                 print(f"Failed to convert {kernel}")

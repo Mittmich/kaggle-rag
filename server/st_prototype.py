@@ -110,7 +110,10 @@ st.title("Chat with Kaggle competitions")
 
 openai_api_key = st.sidebar.text_input("OpenAI API Key", type="password")
 st.sidebar.markdown("# Select a model")
-selected_model_name = st.sidebar.selectbox("Model", ["gpt-3.5-turbo-1106", "gpt-4-1106-preview"])
+selected_model_name = st.sidebar.selectbox(
+    "Model",
+    ["gpt-3.5-turbo-1106", "gpt-4-1106-preview"],
+)
 st.sidebar.markdown("# Select a competition")
 competition = st.sidebar.selectbox("Competition", competitions)
 
