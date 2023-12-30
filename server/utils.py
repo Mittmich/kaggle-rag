@@ -45,7 +45,6 @@ class KaggleCompetitionDownloader:
                     "100",
                 ],
                 capture_output=True,
-                check=True,
             )
             output = res.stdout.decode("utf-8")
             if "Not found" in output:
@@ -61,7 +60,7 @@ class KaggleCompetitionDownloader:
         """Download kernels to path"""
         for _, row in kernels.iterrows():
             subprocess.run(
-                ["kaggle", "kernels", "pull", row["ref"]], cwd=str(path), check=True
+                ["kaggle", "kernels", "pull", row["ref"]], cwd=str(path)
             )
 
     def download_all_kernels(self, path: str):

@@ -16,6 +16,18 @@ This repository contains a RAG (Retriever-Augmented Generation) application that
 - Install the required dependencies using `pip install -r requirements.txt`.
 - Run the Streamlit application using `streamlit run server/app.py`.
 
+# Usage
+
+
+
+
+# Examples
+
+In this example, we see how to load the data for the [predict-energy-behavior-of-prosumers](https://www.kaggle.com/competitions/predict-energy-behavior-of-prosumers/) competition:
+
+![Alt Text](docs/chat_example_1.jpg)
+
+
 # License
 
 This project is licensed under the terms of the MIT license.

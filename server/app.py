@@ -73,9 +73,9 @@ def create_chain(competition_name, api_key, model_name="gpt-3.5-turbo-1106"):
         str(JUPYTER_NB_CACHE_DIR / competition_name),
         api_key=api_key,
     )
-    retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
+    retriever = vectorstore.as_retriever(search_kwargs={"k": 5})
     bm25_retriever = BM25Retriever.from_documents(split_docs)
-    bm25_retriever.k = 3
+    bm25_retriever.k = 5
     ensemble_retriever = EnsembleRetriever(
         retrievers=[bm25_retriever, retriever],
         weights=[0.5, 0.5],
@@ -103,6 +103,13 @@ def generate_response(input_text, api_key, model_name):
         message_placeholder.markdown(full_text)
     return chain
 
+
+# create directories for cache if they don't exist
+if not os.path.exists(JUPYTER_NB_CACHE_DIR):
+    JUPYTER_NB_CACHE_DIR.mkdir(parents=True)
+
+if not os.path.exists(EMBEDDING_CACHE_DIR):
+    EMBEDDING_CACHE_DIR.mkdir(parents=True)
 
 competitions = available_competitions()
 
