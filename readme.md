@@ -13,8 +13,8 @@ This repository contains a RAG (Retriever-Augmented Generation) application that
 
 - Clone the repository to your local machine.
 - Navigate to the repository's directory.
-- Install the required dependencies using pip install -r requirements.txt.
-- Run the Streamlit application using streamlit run app.py.
+- Install the required dependencies using `pip install -r requirements.txt`.
+- Run the Streamlit application using `streamlit run server/app.py`.
 
 # License
 
