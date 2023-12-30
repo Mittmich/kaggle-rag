@@ -1,19 +1,22 @@
-import streamlit as st
+from __future__ import annotations
+
 import os
+import shutil
 from pathlib import Path
 
+import streamlit as st
 from langchain.chat_models import ChatOpenAI
+from langchain.document_loaders import UnstructuredMarkdownLoader
+from langchain.embeddings import CacheBackedEmbeddings
 from langchain.embeddings import OpenAIEmbeddings
 from langchain.prompts import ChatPromptTemplate
+from langchain.retrievers import BM25Retriever
+from langchain.retrievers import EnsembleRetriever
+from langchain.storage import LocalFileStore
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import FAISS
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.runnables import RunnableLambda, RunnablePassthrough
-import shutil
-from langchain.document_loaders import UnstructuredMarkdownLoader
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.storage import LocalFileStore
-from langchain.embeddings import CacheBackedEmbeddings
-from langchain.retrievers import BM25Retriever, EnsembleRetriever
+from langchain_core.runnables import RunnablePassthrough
 from utils import KaggleCompetitionDownloader
 
 JUPYTER_NB_CACHE_DIR = Path(".cache") / "jupyter_nb"
@@ -37,7 +40,7 @@ def load_document(path):
 
 def format_docs(docs):
     return "\n\n----------------------------------------------------\n\n".join(
-        [d.page_content for d in docs]
+        [d.page_content for d in docs],
     )
 
 
@@ -50,7 +53,9 @@ def create_vector_store(directory, api_key):
     underlying_embeddings = OpenAIEmbeddings(openai_api_key=api_key)
     store = LocalFileStore(EMBEDDING_CACHE_DIR)
     cached_embedder = CacheBackedEmbeddings.from_bytes_store(
-        underlying_embeddings, store, namespace=underlying_embeddings.model
+        underlying_embeddings,
+        store,
+        namespace=underlying_embeddings.model,
     )
     vectorstore = FAISS.from_documents(split_docs, embedding=cached_embedder)
     return split_docs, vectorstore
@@ -59,13 +64,15 @@ def create_vector_store(directory, api_key):
 def create_chain(competition_name, api_key, model_name="gpt-3.5-turbo-1106"):
     # create retriever
     split_docs, vectorstore = create_vector_store(
-        str(JUPYTER_NB_CACHE_DIR / competition_name), api_key=api_key
+        str(JUPYTER_NB_CACHE_DIR / competition_name),
+        api_key=api_key,
     )
     retriever = vectorstore.as_retriever(search_kwargs={"k": 3})
     bm25_retriever = BM25Retriever.from_documents(split_docs)
     bm25_retriever.k = 3
     ensemble_retriever = EnsembleRetriever(
-        retrievers=[bm25_retriever, retriever], weights=[0.5, 0.5]
+        retrievers=[bm25_retriever, retriever],
+        weights=[0.5, 0.5],
     )
     # create chain
     prompt = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)
