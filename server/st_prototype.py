@@ -36,7 +36,9 @@ def load_document(path):
 
 
 def format_docs(docs):
-    return "\n\n----------------------------------------------------\n\n".join([d.page_content for d in docs])
+    return "\n\n----------------------------------------------------\n\n".join(
+        [d.page_content for d in docs]
+    )
 
 
 @st.cache_resource
@@ -75,9 +77,10 @@ def create_chain(competition_name, api_key, model_name="gpt-3.5-turbo-1106"):
         | StrOutputParser()
     )
 
+
 def generate_response(input_text, api_key, model_name):
     chain = create_chain(competition, api_key, model_name)
-    with st.chat_message("Bot:") :
+    with st.chat_message("Bot:"):
         message_placeholder = st.empty()
         full_text = ""
         for chunk in chain.stream(input_text):
@@ -85,6 +88,7 @@ def generate_response(input_text, api_key, model_name):
             message_placeholder.markdown(full_text + "▌")
         message_placeholder.markdown(full_text)
     return chain
+
 
 competitions = available_competitions()
 
@@ -153,4 +157,4 @@ with st.form("my_form"):
 
 if used_chain is not None:
     st.markdown("## Context")
-    st.markdown(used_chain.steps[0].invoke(text)['context'])
+    st.markdown(used_chain.steps[0].invoke(text)["context"])
